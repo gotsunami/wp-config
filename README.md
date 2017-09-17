@@ -9,9 +9,11 @@ Stop installing a new archive of WordPress for each new project.
 3. Create new environments as copy of your default environment using simple commands.
 4. Edit each environment separately (WP configuration, themes, and plugins)
 
+![Out of Pluto / WordPress / wp-config](https://www.outofpluto.com/media/uploads/wp-config.png)
+
 Install
 -----
-Follow the instruction to install and configure a WordPress installation https://codex.wordpress.org/Installing_WordPress. Then:
+Follow the instruction to install and configure a WordPress https://codex.wordpress.org/Installing_WordPress. Then:
 
 
 	git clone https://github.com/gotsunami/wp-config.git
