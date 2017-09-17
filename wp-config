@@ -7,7 +7,7 @@ function usage {
     echo "Available commands:";
     echo "- init: Create the wordpress 'default' configuration.";
     echo "";
-    echo "- create: Create a new wordpress configuration in <config_dir>.";
+    echo "- create: Create a new wordpress configuration in <config_name>.";
     echo "          If a 'default' configuration exists, the newly created configuration ";
     echo "          is copied from it. Else, it is created from current WP installation.";
     echo "";
@@ -21,8 +21,8 @@ function usage {
     echo "  1. Start with '$0 init'. This will create and activate a 'default' configuration equal to your current working WordPress.";
     echo "";
     echo "  2. Use '$0 create <config_name>' to create a new configuration copied from 'default'. Then edit './wp-configs/<config_name>/wp-config.php' if necessary. You also need to create a new database to match your new settings.";
-    echo "          CREATE database $config CHARACTER SET utf8mb4";
-    echo "	    GRANT ALL PRIVILEGES on $config.* to oop@localhost";
+    echo "          CREATE database <config_name> CHARACTER SET utf8mb4";
+    echo "	    GRANT ALL PRIVILEGES on <config_name>.* to <user>";
     echo "";
     echo "  3. Use '$0 activate <config_name>' to load a configuration";
     
