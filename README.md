@@ -46,7 +46,27 @@ Activate a configuration
 Other commands
 --------
 
-	./wp-config list
-	./wp-config current
 	./wp-config
+	Usage: ./wp-config <command> [<config_name>]
 
+	Available commands:
+	- init: Create the wordpress 'default' configuration.
+
+	- create: Create a new wordpress configuration in <config_name>.
+          If a 'default' configuration exists, the newly created configuration 
+          is copied from it. Else, it is created from current WP installation.
+
+	- activate: Activate an existing wordpress configuration.
+
+	- list: List the available wordpress configurations.
+
+	- current: Display currently active wordpress configuration.
+
+	HOW TO:
+  	1. Start with './wp-config init'. This will create and activate a 'default' configuration equal to your current working WordPress.
+
+	2. Use './wp-config create <config_name>' to create a new configuration copied from 'default'. Then edit './wp-configs/<config_name>/wp-config.php' if necessary. You also need to create a new database to match your new settings.
+            CREATE database <config_name> CHARACTER SET utf8mb4
+            GRANT ALL PRIVILEGES on <config_name>.* to <user>
+
+  	3. Use './wp-config activate <config_name>' to load a configuration
