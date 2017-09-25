@@ -1,0 +1,171 @@
+#!/bin/bash
+
+# display usage
+function usage {
+    echo "Usage: $0 <command> [<env_name>]";
+    echo "";
+    echo "Available commands:";
+    echo "- init: Create the wordpress 'default' environment.";
+    echo "";
+    echo "- create: Create a new wordpress environment in <env_name>.";
+    echo "          If a 'default' environment exists, the newly created environment ";
+    echo "          is copied from it. Else, it is created from current WP installation.";
+    echo "";
+    echo "- activate: Activate an existing wordpress environment.";
+    echo "";
+    echo "- list: List the available wordpress environments.";
+    echo "";
+    echo "- current: Display currently active wordpress environment.";
+    echo "";
+    echo "HOW TO:";
+    echo "  1. Start with '$0 init'. This will create and activate a 'default' environment equal to your current working WordPress.";
+    echo "";
+    echo "  2. Use '$0 create <env_name>' to create a new environment copied from 'default'. Then edit './wp-envs/<env_name>/wp-env.php' if necessary. You also need to create a new database to match your new settings.";
+    echo "          CREATE database <env_name> CHARACTER SET utf8mb4";
+    echo "	    GRANT ALL PRIVILEGES on <env_name>.* to <user>";
+    echo "";
+    echo "  3. Use '$0 activate <env_name>' to load a environment";
+    
+    exit 1;
+}
+
+# choose function to run according to command
+function run {
+    if [ $cmd == 'init' ]; then
+	init
+    elif [ $cmd == 'create' ]; then
+	create
+    elif [ $cmd == 'activate' ]; then
+	activate
+    elif [ $cmd == 'list' ]; then
+	list
+    elif [ $cmd == 'current' ]; then
+	current
+    else
+	usage
+    fi;
+    
+    exit 0;
+}
+
+# function to create symbolic link for a valid environment.
+# called by init and activate 
+function _create_sym_links {
+    ln -s wp-envs/$env/wp-config.php .;
+    cd wp-content;
+    ln -s ../wp-envs/$env/themes themes;
+    ln -s ../wp-envs/$env/plugins plugins;
+    cd ..;
+}
+
+# first command to execute to init a newly installed WordPress
+# It creates the wp-envs folder and init a 'default' environment
+function init {
+    if [ -d wp-envs/default ]; then
+	echo "$cmd error: wp-envs/default already exists";
+	exit 1;
+    fi;
+
+    if [[ -L wp-config.php ]]; then
+	echo "$cmd error: wp-config.php is a symbolic link (directory already initialized?)";
+	exit 2;
+    fi;
+
+    if [[ -L wp-content/themes ]]; then
+	echo "$cmd error: wp-content/themes is a symbolic link (directory already initialized?)";
+	exit 2;
+    fi;
+
+    if [[ -L wp-content/plugins ]]; then
+	echo "$cmd error: wp-content/plugins is a symbolic link (directory already initialized?)";
+	exit 2;
+    fi;
+
+    mkdir wp-envs wp-envs/$env;
+    cp wp-config-sample.php wp-envs;
+    mv wp-config.php wp-content/themes wp-content/plugins wp-envs/$env;
+    _create_sym_links
+}
+
+# activate an existing environment
+function activate {
+    if [ ! -d wp-envs/$env ]; then
+	echo "$cmd error: wp-envs/$env does not exist";
+	exit 1;
+    fi;
+    
+    if [ ! -f wp-envs/$env/wp-config.php ]; then
+	echo "$cmd error: wp-envs/$env/wp-config.php is missing";
+	exit 1;
+    fi;
+    
+    if [ ! -d wp-envs/$env/themes ]; then
+	echo "$cmd error: wp-envs/$env/themes is missing";
+	exit 1;
+    fi;
+    
+    if [ ! -d wp-envs/$env/plugins ]; then
+	echo "$cmd error: wp-envs/$env/plugins is missing";
+	exit 1;
+    fi;
+
+    if [[ ! -L wp-config.php ]]; then
+	echo "$cmd error: wp-config.php is not a symbolic link (did you run wp-env init?)";
+	exit 2;
+    fi;
+
+    if [[ ! -L wp-content/themes ]]; then
+	echo "$cmd error: wp-content/themes is not a symbolic link (did you run wp-env init?)";
+	exit 2;
+    fi;
+
+    if [[ ! -L wp-content/plugins ]]; then
+	echo "$cmd error: wp-content/plugins is not a symbolic link (did you run wp-env init?)";
+	exit 2;
+    fi;
+
+    rm wp-config.php wp-content/themes wp-content/plugins;
+    _create_sym_links
+}
+
+# activates an new environment existing environment
+# replace the name of the DB in wp-config.php
+function create {
+    if [ -d wp-envs/$env ]; then
+	echo "$cmd error: wp-envs/$env already exists";
+	exit 1;
+    fi;
+    if [ ! -d wp-envs/default ]; then
+	echo "$cmd error: wp-envs/default does not exist (did you run wp-env init?)";
+	exit 1;
+    fi
+    cp -r wp-envs/default wp-envs/$env;
+    sed -i -r s/\'DB_NAME\'\,\ \'[[:alnum:]]+\'/\'DB_NAME\'\,\ \'$env\'/ wp-envs/$env/wp-config.php;
+    echo "$cmd warning: do not forget to create a new database '$env' before activating"
+}
+
+# lists the available envs
+function list {
+    ls -d wp-envs/*/ | sed s#/#''#g | sed s#wp-envs##
+}
+
+# displays current activated env
+function current {
+    ls -la wp-config.php | cut -f 2 -d '/'
+}
+
+# If not parameters are given, display usage
+if [ $# -lt 1 ]; then
+    usage
+fi;
+
+# set variables
+# if command is 'init', always set env to 'default'
+cmd=$1;
+if [ $cmd == 'init' ]; then
+    env='default'
+else
+    env=$2;
+fi;
+
+run;

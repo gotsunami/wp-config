@@ -1,8 +1,8 @@
-function wpconfig {
- ./wp-config current 2> /dev/null > /dev/null
+function wpenv {
+ ./wp-env current 2> /dev/null > /dev/null
  if [ $? -eq 0 ]; then
-     echo "["`./wp-config current 2> /dev/null`"] ";
+     echo "["`./wp-env current 2> /dev/null`"] ";
  fi
 }
 
-PS1='(\u@\h `wpconfig`\!'
+PS1='(\u@\h `wpenv`\!'
